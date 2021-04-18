@@ -5,7 +5,7 @@ import os
 
 # Some constants
 RESULT_PATH = './result'       # The path that the result images will be saved
-FILE_PATH = './frame/begin/frame0.jpg'         # Dataset path
+
 LOG_PATH = 'log.txt'            # The path for the working log file
 LIP_MARGIN = 0.3                # Marginal rate for lip-only image.
 RESIZE = (64, 64)                # Final image size
@@ -18,7 +18,7 @@ def shape_to_list(shape):
     return coords
 
 
-def extract_lip(imag_path,ind):
+def extract_lip(imag_path,ind,filename):
     logfile = open(LOG_PATH, 'w')
     # Face detector and landmark detector
     face_detector = dlib.get_frontal_face_detector()
@@ -37,18 +37,18 @@ def extract_lip(imag_path,ind):
     face_rects = face_detector(gray, 1)             # Detect face
     if len(face_rects) < 1:                 # No face detected
         print("No face detected: ", imag_path+str(ind))
-        logfile.write(FILE_PATH + " : No face detected \r\n")
+        logfile.write(imag_path + " : No face detected \r\n")
 
     if len(face_rects) > 1:                  # Too many face detected
         print("Too many face: ", imag_path+str(ind))
-        logfile.write(FILE_PATH + " : Too many face detected \r\n")
+        logfile.write(imag_path + " : Too many face detected \r\n")
     else:
         rect = face_rects[0]                    # Proper number of face
         landmark = landmark_detector(gray, rect)   # Detect face landmarks
         landmark = shape_to_list(landmark)
         landmark_buffer.append(landmark)
         print("good: ",imag_path+str(ind))
-        logfile.write(FILE_PATH + " : Good \r\n")
+        logfile.write(imag_path + " : Good \r\n")
         # Crop images
         cropped_buffer = []
         lip_landmark = landmark[48:68]  # Landmark corresponding to lip
@@ -66,7 +66,7 @@ def extract_lip(imag_path,ind):
         cropped_buffer.append(cropped)
         # Save result
         print("# Save result")
-        directory = RESULT_PATH + "/"
+        directory = RESULT_PATH + "/begin"+str(filename)+"/"
         if not os.path.exists(directory):
                 os.makedirs(directory)
         cv2.imwrite(directory + str(ind) + ".jpg", cropped_buffer[0])
